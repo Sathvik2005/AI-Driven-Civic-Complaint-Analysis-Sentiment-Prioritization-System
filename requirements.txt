@@ -1,0 +1,47 @@
+# Core Data Science Libraries
+pandas>=1.5.0
+numpy>=1.23.0
+matplotlib>=3.6.0
+seaborn>=0.12.0
+
+# Machine Learning
+scikit-learn>=1.2.0
+imbalanced-learn>=0.10.0
+joblib>=1.2.0
+
+# NLP Libraries
+nltk>=3.8.0
+spacy>=3.5.0
+
+# Deep Learning
+torch>=2.0.0
+transformers>=4.30.0
+datasets>=2.12.0
+accelerate>=0.20.0
+sentence-transformers>=2.2.0
+
+# Explainability
+shap>=0.41.0
+lime>=0.2.0
+
+# Hyperparameter Optimization
+optuna>=3.1.0
+
+# Text Processing
+textblob>=0.17.0
+wordcloud>=1.9.0
+gensim>=4.3.0
+
+# Visualization
+plotly>=5.14.0
+pyLDAvis>=3.4.0
+
+# Web Application (Streamlit)
+streamlit>=1.25.0
+
+# Kaggle Dataset Download
+kagglehub>=0.1.0
+
+# Utilities
+tqdm>=4.65.0
+python-dateutil>=2.8.0
