@@ -1,0 +1,24 @@
+{
+    "model_type": "LinearSVC",
+    "vectorizer_type": "TfidfVectorizer",
+    "vocabulary_size": 130,
+    "max_features": 5000,
+    "ngram_range": [
+        1,
+        2
+    ],
+    "test_accuracy": 1.0,
+    "test_macro_f1": 1.0,
+    "sentiment_classes": [
+        "Critical",
+        "Negative",
+        "Neutral",
+        "Positive"
+    ],
+    "class_distribution": {
+        "Critical": 24479,
+        "Negative": 4418,
+        "Neutral": 8869,
+        "Positive": 2234
+    }
+}
