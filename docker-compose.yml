@@ -1,0 +1,46 @@
+version: '3.8'
+
+services:
+  api:
+    build: .
+    container_name: grievance-api
+    ports:
+      - "8000:8000"
+    environment:
+      - MODELS_PATH=/app/trained_models
+      - PYTHONUNBUFFERED=1
+    volumes:
+      - ./trained_models:/app/trained_models:ro
+      - ./outputs:/app/outputs
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    restart: unless-stopped
+
+  ui:
+    build: .
+    container_name: grievance-ui
+    ports:
+      - "8501:8501"
+    environment:
+      - API_URL=http://api:8000
+      - PYTHONUNBUFFERED=1
+    depends_on:
+      - api
+    volumes:
+      - ./trained_models:/app/trained_models:ro
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    container_name: grievance-cache
+    ports:
+      - "6379:6379"
+    restart: unless-stopped
+
+networks:
+  default:
+    name: grievance-network
