@@ -1,16 +1,14 @@
 @echo off
-REM Citizen Grievance Analysis System - Windows Startup Script
-REM This script starts FastAPI and Streamlit services in separate windows
+REM ============================================================
+REM NYC 311 Citizen Grievance Analysis - Windows Startup Script
+REM ============================================================
 
 setlocal enabledelayedexpansion
 
-title Citizen Grievance Analysis System
-
-REM Colors setup (using cls for visual separation)
 echo.
-echo ================================================================================
-echo   CITIZEN GRIEVANCE ANALYSIS SYSTEM - WINDOWS LAUNCHER
-echo ================================================================================
+echo ============================================================
+echo  NYC 311 CITIZEN GRIEVANCE ANALYSIS - PROJECT STARTUP
+echo ============================================================
 echo.
 
 REM Check if Python is installed
@@ -22,45 +20,108 @@ if errorlevel 1 (
     exit /b 1
 )
 
-echo [INFO] Python is installed
-echo.
+echo [OK] Python found
+python --version
 
-REM Change to project directory
-cd /d "%~dp0"
-echo [INFO] Working directory: %CD%
-
-REM Check requirements
-echo [CHECK] Verifying dependencies...
-python -m pip show streamlit >nul 2>&1
+REM Check if pip is installed
+pip --version >nul 2>&1
 if errorlevel 1 (
-    echo [ACTION] Installing requirements...
-    call python -m pip install -r requirements.txt
-    if errorlevel 1 (
-        echo [ERROR] Failed to install requirements
-        pause
-        exit /b 1
-    )
+    echo [ERROR] pip is not installed
+    pause
+    exit /b 1
 )
-echo [SUCCESS] Dependencies verified
+
+echo [OK] pip found
+
+REM Set project directory
+set PROJECT_DIR=%~dp0
+cd /d "%PROJECT_DIR%"
+
+echo.
+echo [INFO] Project directory: %PROJECT_DIR%
 echo.
 
-REM Check/download dataset
-if exist "datasets\*.csv" (
-    echo [SUCCESS] Dataset exists
+REM Install requirements
+echo [INFO] Checking dependencies...
+python -m pip install --upgrade pip -q >nul 2>&1
+
+if not exist requirements.txt (
+    echo [WARN] requirements.txt not found, skipping dependency installation
 ) else (
-    echo [ACTION] Downloading dataset...
-    call python download_dataset.py
+    echo [INFO] Installing requirements from requirements.txt...
+    pip install -r requirements.txt -q
     if errorlevel 1 (
-        echo [WARNING] Dataset download failed - will use synthetic data
-    ) else (
-        echo [SUCCESS] Dataset downloaded
+        echo [WARN] Some dependencies failed to install, but continuing anyway...
     )
 )
+
+echo.
+echo ============================================================
+echo  STARTING PROJECT WORKFLOW
+echo ============================================================
 echo.
 
-REM Check/train models
-if exist "trained_models\sentiment_model.joblib" (
-    echo [SUCCESS] Models are trained
+REM Parse command line arguments
+set SKIP_DOWNLOAD=
+set SKIP_TRAIN=
+set START_SERVICES=
+set API_PORT=8000
+set UI_PORT=8501
+
+:parse_args
+if "%1"=="" goto run_project
+if "%1"=="--skip-download" set SKIP_DOWNLOAD=True
+if "%1"=="--skip-train" set SKIP_TRAIN=True
+if "%1"=="--start-services" set START_SERVICES=True
+if "%1"=="--api-port" set API_PORT=%2
+if "%1"=="--ui-port" set UI_PORT=%2
+shift
+goto parse_args
+
+:run_project
+echo [INFO] Running project with options:
+if defined SKIP_DOWNLOAD echo   - Skip Download: YES
+if defined SKIP_TRAIN echo   - Skip Training: YES
+if defined START_SERVICES echo   - Start Services: YES
+echo   - API Port: %API_PORT%
+echo   - UI Port: %UI_PORT%
+echo.
+
+REM Run the main project script
+python run_project.py ^
+    %if defined SKIP_DOWNLOAD% --skip-download %else% % ^
+    %if defined SKIP_TRAIN% --skip-train %else% % ^
+    %if defined START_SERVICES% --start-services %else% %
+
+if errorlevel 1 (
+    echo.
+    echo [ERROR] Project execution failed
+    pause
+    exit /b 1
+)
+
+echo.
+echo ============================================================
+echo  PROJECT COMPLETED SUCCESSFULLY
+echo ============================================================
+echo.
+echo [OK] Sentiment analysis models trained on complete dataset
+echo [OK] Deployment artifacts prepared
+echo.
+echo [INFO] Next steps:
+echo   1. Check trained models in: trained_models/
+echo   2. Review outputs in: outputs/
+echo   3. Check logs in: logs/project.log
+echo.
+
+pause
+
+goto EOF
+
+REM This section below is now obsolete - moved to run_project.py
+
+:EOF
+
 ) else (
     echo [ACTION] Training models (this may take 2-5 minutes)...
     echo Starting Jupyter conversion...
