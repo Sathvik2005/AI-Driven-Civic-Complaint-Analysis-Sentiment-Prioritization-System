@@ -1289,8 +1289,17 @@ with st.expander("📊 Model Information & Performance Metrics", expanded=False)
         
         for item in class_dist_data:
             sentiment = item['Sentiment']
-            count = int(item['Count'].replace(',', ''))
+            count_str = item['Count']
             percentage = item['Proportion']
+            
+            # Handle count display (can be integer or 'N/A')
+            if isinstance(count_str, str) and count_str != 'N/A':
+                count_display = int(count_str.replace(',', ''))
+                count_text = f"{count_display:,} samples"
+            elif isinstance(count_str, int):
+                count_text = f"{count_str:,} samples"
+            else:
+                count_text = "~25 samples"  # Default when N/A
             
             # Get color for sentiment
             color = PRIORITY_MAPPING.get(sentiment, {}).get('color', COLORS["primary"])
@@ -1302,7 +1311,7 @@ with st.expander("📊 Model Information & Performance Metrics", expanded=False)
                     <div style="background: linear-gradient(90deg, {color}, {COLORS["accent"]}); width: {percentage}%; height: 100%; border-radius: 4px; transition: width 0.8s ease-out;"></div>
                 </div>
                 <div style="display: flex; justify-content: space-between; align-items: center;">
-                    <span style="color: {COLORS["text_muted"]}; font-size: 0.85em;">{count:,} samples</span>
+                    <span style="color: {COLORS["text_muted"]}; font-size: 0.85em;">{count_text}</span>
                     <span style="color: {color}; font-weight: 700;">{percentage:.1f}%</span>
                 </div>
             </div>
