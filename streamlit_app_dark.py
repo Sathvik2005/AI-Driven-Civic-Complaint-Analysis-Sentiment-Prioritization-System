@@ -1242,7 +1242,7 @@ with st.expander("📊 Model Information & Performance Metrics", expanded=False)
                 </div>
                 <div style="padding: 15px; background: linear-gradient(135deg, rgba(10, 102, 194, 0.1) 0%, {COLORS["dark_bg"]} 100%); border-radius: 4px; border-left: 3px solid {COLORS["primary"]};">
                     <span style="color: {COLORS["text_muted"]}; font-size: 0.85em; text-transform: uppercase;">F1-Score</span>
-                    <div style="color: {COLORS["primary_light"]}; font-weight: 700; margin-top: 6px; font-size: 1.4em;">{f1_score:.4f if isinstance(f1_score, float) else f1_score}</div>
+                    <div style="color: {COLORS["primary_light"]}; font-weight: 700; margin-top: 6px; font-size: 1.4em;">{(f"{f1_score:.4f}" if isinstance(f1_score, float) else f1_score)}</div>
                 </div>
                 <div style="padding: 15px; background: linear-gradient(135deg, rgba(255, 107, 53, 0.1) 0%, {COLORS["dark_bg"]} 100%); border-radius: 4px; border-left: 3px solid {COLORS["accent"]};">
                     <span style="color: {COLORS["text_muted"]}; font-size: 0.85em; text-transform: uppercase;">Classification Classes</span>
