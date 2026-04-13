@@ -937,8 +937,9 @@ with st.sidebar:
         with st.expander("Model Details"):
             st.write(f"**Model Type:** {metadata['model_type']}")
             st.write(f"**Vectorizer:** {metadata['vectorizer_type']}")
-            st.write(f"**Test Accuracy:** {metadata['test_accuracy']:.1%}")
-            st.write(f"**F1-Score (Macro):** {metadata['test_macro_f1']:.4f}")
+            perf = metadata.get('performance', {})
+            st.write(f"**Test Accuracy:** {perf.get('test_accuracy_percentage', 'N/A')}")
+            st.write(f"**F1-Score:** {perf.get('test_f1_score', 'N/A'):.4f}")
             st.write(f"**Classes:** {len(metadata['sentiment_classes'])}")
     else:
         st.markdown(f"""
@@ -1230,15 +1231,18 @@ with st.expander("📊 Model Information & Performance Metrics", expanded=False)
         <h4 style="color: {COLORS["primary_light"]}; margin-top: 0; margin-bottom: 18px; font-size: 1.1em; text-transform: uppercase; letter-spacing: 1px;">📈 Performance Metrics</h4>
         """, unsafe_allow_html=True)
         if metadata:
+            perf = metadata.get('performance', {})
+            test_acc = perf.get('test_accuracy_percentage', 'N/A')
+            f1_score = perf.get('test_f1_score', 'N/A')
             perf_html = f"""
             <div style="display: grid; gap: 10px;">
                 <div style="padding: 15px; background: linear-gradient(135deg, rgba(6, 168, 125, 0.1) 0%, {COLORS["dark_bg"]} 100%); border-radius: 4px; border-left: 3px solid {COLORS["success"]};">
                     <span style="color: {COLORS["text_muted"]}; font-size: 0.85em; text-transform: uppercase;">Test Accuracy</span>
-                    <div style="color: {COLORS["success"]}; font-weight: 700; margin-top: 6px; font-size: 1.4em;">{metadata['test_accuracy']:.1%}</div>
+                    <div style="color: {COLORS["success"]}; font-weight: 700; margin-top: 6px; font-size: 1.4em;">{test_acc}</div>
                 </div>
                 <div style="padding: 15px; background: linear-gradient(135deg, rgba(10, 102, 194, 0.1) 0%, {COLORS["dark_bg"]} 100%); border-radius: 4px; border-left: 3px solid {COLORS["primary"]};">
-                    <span style="color: {COLORS["text_muted"]}; font-size: 0.85em; text-transform: uppercase;">F1-Score (Macro)</span>
-                    <div style="color: {COLORS["primary_light"]}; font-weight: 700; margin-top: 6px; font-size: 1.4em;">{metadata['test_macro_f1']:.4f}</div>
+                    <span style="color: {COLORS["text_muted"]}; font-size: 0.85em; text-transform: uppercase;">F1-Score</span>
+                    <div style="color: {COLORS["primary_light"]}; font-weight: 700; margin-top: 6px; font-size: 1.4em;">{f1_score:.4f if isinstance(f1_score, float) else f1_score}</div>
                 </div>
                 <div style="padding: 15px; background: linear-gradient(135deg, rgba(255, 107, 53, 0.1) 0%, {COLORS["dark_bg"]} 100%); border-radius: 4px; border-left: 3px solid {COLORS["accent"]};">
                     <span style="color: {COLORS["text_muted"]}; font-size: 0.85em; text-transform: uppercase;">Classification Classes</span>
@@ -1254,17 +1258,30 @@ with st.expander("📊 Model Information & Performance Metrics", expanded=False)
         st.markdown('</div>', unsafe_allow_html=True)
     
     # Class Distribution - Enhanced Visualization
-    st.markdown(f'<div class="section-title">📊 Sentiment Class Distribution</div>', unsafe_allow_html=True)
+    st.markdown(f'<div class="section-title">📊 Sentiment Classes</div>', unsafe_allow_html=True)
     if metadata:
+        # Display supported classes
+        classes = metadata.get('sentiment_classes', [])
+        st.write(f"**Supported Sentiment Classes:** {', '.join(classes)}")
+        
+        # Display additional model metrics
+        perf = metadata.get('performance', {})
+        col1, col2, col3 = st.columns(3)
+        with col1:
+            st.metric("Cross-Val Mean", f"{perf.get('cross_val_mean', 0):.4f}")
+        with col2:
+            st.metric("Cross-Val Std", f"{perf.get('cross_val_std', 0):.4f}")
+        with col3:
+            st.metric("Generalization Gap", f"{perf.get('generalization_gap', 0):.2%}")
+        
+        # Prepare empty data for compatibility
         class_dist_data = []
-        total = sum(metadata['class_distribution'].values())
-        for sentiment, count in metadata['class_distribution'].items():
-            percentage = (count / total) * 100
+        for sentiment in classes:
             class_dist_data.append({
                 'Sentiment': sentiment,
-                'Count': f"{count:,}",
-                'Percentage': f"{percentage:.1f}%",
-                'Proportion': percentage  # For visualization
+                'Count': 'N/A',
+                'Percentage': 'N/A',
+                'Proportion': 25  # Equal distribution
             })
         
         # Create visual distribution
